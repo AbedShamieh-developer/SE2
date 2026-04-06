@@ -2,20 +2,20 @@ import { Item, ItemCategory } from "./Item.model";
 
 export class Cake implements Item {
     constructor(
-        public type: string,
-        public flavor: string,
-        public filling: string,
-        public size: number,
-        public layers: number,
-        public frostingType: string,
-        public frostingFlavor: string,
-        public decorationType: string,
-        public decorationColor: string,
-        public customMessage: string,
-        public shape: string,
-        public allergies: string,
-        public specialIngredients: string,
-        public packagingType: string
+        private type: string,
+        private flavor: string,
+        private filling: string,
+        private size: number,
+        private layers: number,
+        private frostingType: string,
+        private frostingFlavor: string,
+        private decorationType: string,
+        private decorationColor: string,
+        private customMessage: string,
+        private shape: string,
+        private allergies: string,
+        private specialIngredients: string,
+        private packagingType: string
     ) {}
 
     getType(): string {
