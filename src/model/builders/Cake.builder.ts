@@ -101,6 +101,9 @@ export class CakeBuilder {
         this.packagingType = this.validateRequiredText(packagingType, "packagingType")
         return this
     }
+    static newCakeBuilder(){
+        return new CakeBuilder();
+    }
 
     build(): Cake {
         const requiredProperties = [

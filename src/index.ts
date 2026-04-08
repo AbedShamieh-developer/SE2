@@ -1,19 +1,14 @@
-import { CakeBuilder } from "./model/builders/Cake.builder";
+import { CSVCakeMapper } from "./mappers/Cake.mapper";
+import { CSVOrderMapper } from "./mappers/Order.mapper";
+import logger from "./util/logger";
+import { CSVParser } from "./util/parser";
 
-let cakeBuilder = new CakeBuilder();
-let cake = cakeBuilder.setType("Frosy")
-    .setFlavor("Chocolate")
-    .setFilling("Vanilla Cream")
-    .setSize(8)
-    .setLayers(2)
-    .setFrostingType("Buttercream")
-    .setFrostingFlavor("Chocolate")
-    .setDecorationType("Sprinkles")
-    .setDecorationColor("Blue")
-    .setCustomMessage("Happy Birthday")
-    .setShape("Round")
-    .setAllergies("Milk")
-    .setSpecialIngredients("Strawberries")
-    .setPackagingType("Box")
-    .build()
-console.log(cake)
+async function main() {
+    const data = await CSVParser.parseRows("src/data/cake orders.csv", { skipHeader: true })
+    const mapper = new CSVCakeMapper()
+    const orderMapper = new CSVOrderMapper(mapper) 
+    const orders = data.map(row=> orderMapper.map(row))
+    const ordersParsed = CSVParser.toPrettyJSON(orders)
+    logger.info(ordersParsed)
+}
+main().catch((error) => logger.error(error))

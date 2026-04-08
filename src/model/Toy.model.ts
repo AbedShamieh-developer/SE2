@@ -1,6 +1,6 @@
-import { Item, ItemCategory } from "./Item.model";
+import { IItem, ItemCategory } from "./IItem.model";
 
-export class Toy implements Item{
+export class Toy implements IItem{
     constructor(
         private name: string,
         private brand: string,
