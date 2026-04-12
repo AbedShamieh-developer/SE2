@@ -1,0 +1,40 @@
+[
+  {
+    "id": 0,
+    "Type": "Sponge",
+    "Flavor": "Vanilla",
+    "Filling": "Cream",
+    "Size": 20,
+    "Layers": 2,
+    "Frosting Type": "Buttercream",
+    "Frosting Flavor": "Vanilla",
+    "Decoration Type": "Sprinkles",
+    "Decoration Color": "Multi-color",
+    "Custom Message": "Happy Birthday",
+    "Shape": "Round",
+    "Allergies": "Nut-Free",
+    "Special Ingredients": "Organic Ingredients",
+    "Packaging Type": "Standard Box",
+    "Price": 50,
+    "Quantity": 1
+  },
+  {
+    "id": 1,
+    "Type": "Chocolate",
+    "Flavor": "Chocolate",
+    "Filling": "Ganache",
+    "Size": 25,
+    "Layers": 3,
+    "Frosting Type": "Fondant",
+    "Frosting Flavor": "Chocolate",
+    "Decoration Type": "Fondant Figures",
+    "Decoration Color": "Red",
+    "Custom Message": "Congrats",
+    "Shape": "Square",
+    "Allergies": "Gluten-Free",
+    "Special Ingredients": "Vegan",
+    "Packaging Type": "Luxury Box with Ribbon",
+    "Price": 75,
+    "Quantity": 2
+  }
+]

@@ -1,14 +1,13 @@
-import { CSVCakeMapper } from "./mappers/Cake.mapper";
-import { CSVOrderMapper } from "./mappers/Order.mapper";
+import { CakeJsonRow, JsonCakeMapper } from "./mappers/JsonCakeMapper";
+import { JsonOrderMapper } from "./mappers/JsonOrderMapper";
+import { parseJsonFile } from "./util/jsonparser";
 import logger from "./util/logger";
-import { CSVParser } from "./util/parser";
 
 async function main() {
-    const data = await CSVParser.parseRows("src/data/cake orders.csv", { skipHeader: true })
-    const mapper = new CSVCakeMapper()
-    const orderMapper = new CSVOrderMapper(mapper) 
-    const orders = data.map(row=> orderMapper.map(row))
-    const ordersParsed = CSVParser.toPrettyJSON(orders)
-    logger.info(ordersParsed)
+    const data = parseJsonFile<CakeJsonRow>("./src/data/Cakes.json")
+    const jCakeMapper = new JsonCakeMapper()
+    const orderMapper = new JsonOrderMapper(jCakeMapper)
+    const cakes = data.map((row) => orderMapper.map(row))
+    logger.info(cakes)
 }
 main().catch((error) => logger.error(error))

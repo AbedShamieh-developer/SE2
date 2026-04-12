@@ -1,4 +1,5 @@
 import winston, { format } from "winston";
+import { inspect } from "util";
 import config from "../config";
 const dirName = config.logDir;
 const isDev = true;
@@ -13,7 +14,12 @@ const logConsoleFormat = winston.format.combine(
     winston.format.timestamp(),
     winston.format.errors({ stack: true }),
     winston.format.printf(({ level, message, timestamp, stack }: any) => {
-        return `${timestamp} [${level}]: ${message} ${stack ? `\nStack trace: ${stack}` : ''}`;
+        const renderedMessage =
+            typeof message === "string"
+                ? message
+                : inspect(message, { depth: null, maxArrayLength: 100, breakLength: 120 });
+
+        return `${timestamp} [${level}]: ${renderedMessage} ${stack ? `\nStack trace: ${stack}` : ''}`;
     })
 );
 
