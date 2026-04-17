@@ -1,4 +1,6 @@
-import { IItem, ItemCategory } from "./IItem.model";
+import { IdentifiableItem, IItem, ItemCategory } from "./IItem.model";
+
+
 
 export class Cake implements IItem {
     constructor(
@@ -76,5 +78,48 @@ export class Cake implements IItem {
 
     getCategory(): ItemCategory {
         return ItemCategory.CAKE;
+    }
+    
+}
+export class IdentifiableCake extends Cake implements IdentifiableItem{
+    constructor(
+        private id: string,
+        type: string,
+        flavor: string,
+        filling: string,
+        size: number,
+        layers: number,
+        frostingType: string,
+        frostingFlavor: string,
+        decorationType: string,
+        decorationColor: string,
+        customMessage: string,
+        shape: string,
+        allergies: string,
+        specialIngredients: string,
+        packagingType: string
+    ){
+        super(
+            type,
+            flavor,
+            filling,
+            size,
+            layers,
+            frostingType,
+            frostingFlavor,
+            decorationType,
+            decorationColor,
+            customMessage,
+            shape,
+            allergies,
+            specialIngredients,
+            packagingType
+        )
+    }
+    getItem(): IItem {
+        return this;
+    }
+    getId(): string {
+        return this.id;
     }
 }

@@ -1,9 +1,17 @@
+import { ID } from "../repository/IRepository";
+import { IOrder } from "./IOrder.model";
+
 export interface IItem {
     getCategory(): ItemCategory
 }
-
+export interface IdentifiableItem extends IItem, ID{
+    getItem(): IItem
+} 
+export interface IdentifiableOrderItem extends ID, IOrder {
+    getItem(): IdentifiableItem
+}
 export enum ItemCategory{
-    CAKE,
-    BOOK,
-    TOY
+    CAKE = "cake",
+    BOOK = "book",
+    TOY = "toy"
 }

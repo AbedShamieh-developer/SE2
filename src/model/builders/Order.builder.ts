@@ -1,5 +1,6 @@
-import { IItem } from "../IItem.model"
-import { Order } from "../Order"
+import { IdentifiableItem, IItem } from "../IItem.model"
+import { IOrder } from "../IOrder.model"
+import { IdentifiableOrder, Order } from "../Order"
 
 export class OrderBuilder {
     private item!: IItem
@@ -70,5 +71,49 @@ export class OrderBuilder {
         }
 
         return new Order(this.item, this.price, this.quantity, this.id)
+    }
+}
+export class IdentifiableOrderBuilder {
+    static newIdentifiableOrderBuilder() {
+        return new IdentifiableOrderBuilder()
+    }
+    private identifiableItem!: IdentifiableItem
+    private price!: number
+    private quantity!: number
+    private id!: string
+
+    setItem(identifiableItem: IdentifiableItem): this {
+        this.identifiableItem = identifiableItem
+        return this
+    }
+
+    setPrice(price: number): this {
+        this.price = price
+        return this
+    }
+
+    setQuantity(quantity: number): this {
+        this.quantity = quantity
+        return this
+    }
+
+    setId(id: string): this {
+        this.id = id
+        return this
+    }
+    build(): IdentifiableOrder {
+        const requiredProperties = [
+            this.identifiableItem,
+            this.price,
+            this.quantity,
+            this.id
+        ]
+        for (const property of requiredProperties) {
+            if (!property) {
+                throw new Error("All order properties are required")
+            }
+        }
+
+        return new IdentifiableOrder(this.identifiableItem, this.price, this.quantity, this.id)
     }
 }

@@ -1,4 +1,4 @@
-import { Cake } from "../Cake.model"
+import { Cake, IdentifiableCake } from "../Cake.model"
 
 export class CakeBuilder {
     private type!: string
@@ -146,4 +146,52 @@ export class CakeBuilder {
             this.packagingType
         )
     }
+}
+export class IdentifiableCakeBuilder {
+    private id!: string
+    private cake!: Cake
+
+    setId(id: string): IdentifiableCakeBuilder {
+        if (!id || !id.trim()) {
+            throw new Error("id is required")
+        }
+        this.id = id.trim()
+        return this
+    }
+    setCake(cake: Cake): IdentifiableCakeBuilder {
+        if (!cake) {
+            throw new Error("cake is required")
+        }
+        this.cake = cake
+        return this
+    }
+    static newIdentifiableCakeBuilder(){
+        return new IdentifiableCakeBuilder();
+    }
+    build(): IdentifiableCake {
+        if (!this.id) {
+            throw new Error("id is required")
+        }
+        if (!this.cake) {
+            throw new Error("cake is required")
+        }
+        return new IdentifiableCake(
+            this.id,
+            this.cake.getType(),
+            this.cake.getFlavor(),
+            this.cake.getFilling(),
+            this.cake.getSize(),
+            this.cake.getLayers(),
+            this.cake.getFrostingType(),
+            this.cake.getFrostingFlavor(),
+            this.cake.getDecorationType(),
+            this.cake.getDecorationColor(),
+            this.cake.getCustomMessage(),
+            this.cake.getShape(),
+            this.cake.getAllergies(),
+            this.cake.getSpecialIngredients(),
+            this.cake.getPackagingType()
+        )
+    }
+
 }

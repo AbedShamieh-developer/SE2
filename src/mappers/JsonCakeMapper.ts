@@ -42,5 +42,27 @@ export class JsonCakeMapper implements IMapper<CakeJsonRow,Cake>{
                         .setPackagingType(data["Packaging Type"])
                         .build()
     }
+
+    reverseMap(data: Cake): CakeJsonRow {
+        return {
+            id: 0,
+            Type: data.getType(),
+            Flavor: data.getFlavor(),
+            Filling: data.getFilling(),
+            Size: data.getSize(),
+            Layers: data.getLayers(),
+            "Frosting Type": data.getFrostingType(),
+            "Frosting Flavor": data.getFrostingFlavor(),
+            "Decoration Type": data.getDecorationType(),
+            "Decoration Color": data.getDecorationColor(),
+            "Custom Message": data.getCustomMessage() === "No message" ? "" : data.getCustomMessage(),
+            Shape: data.getShape(),
+            Allergies: data.getAllergies(),
+            "Special Ingredients": data.getSpecialIngredients(),
+            "Packaging Type": data.getPackagingType(),
+            Price: 0,
+            Quantity: 0
+        }
+    }
 }
     

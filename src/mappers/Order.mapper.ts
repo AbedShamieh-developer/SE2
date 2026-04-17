@@ -1,6 +1,7 @@
-import { OrderBuilder } from "../model/builders/Order.builder";
-import { IItem } from "../model/IItem.model";
-import { Order } from "../model/Order";
+import { IdentifiableOrderBuilder, OrderBuilder } from "../model/builders/Order.builder";
+import { IdentifiableItem, IdentifiableOrderItem, IItem } from "../model/IItem.model";
+import { IOrder } from "../model/IOrder.model";
+import { IdentifiableOrder, Order } from "../model/Order";
 import { IMapper } from "./IMapper";
 
 export class CSVOrderMapper implements IMapper<string[],Order> {
@@ -13,6 +14,46 @@ export class CSVOrderMapper implements IMapper<string[],Order> {
                              .setQuantity(parseInt(data[data.length -1]))
                              .setItem(item)
                              .build()
+    }
+
+    reverseMap(data: IOrder): string[] {
+        if (!this.itemMapper.reverseMap) {
+            throw new Error("Reverse mapping is not implemented for the injected item mapper")
+        }
+
+        const row = this.itemMapper.reverseMap(data.getItem())
+        row[0] = data.getId()
+        row[15] = String(data.getPrice())
+        row[16] = String(data.getQuantity())
+
+        return row
+    }
+}
+export interface SQLiteOrder {
+    id: string;
+    price: number;
+    quantity: number;
+    item_category: string;
+    item_id: string;
+}
+export class SQLiteOrderMapper implements IMapper<{data: SQLiteOrder, item: IdentifiableItem},IdentifiableOrderItem> {
+
+    map({data,item}: {data: SQLiteOrder, item: IdentifiableItem}): IdentifiableOrderItem {
+        return IdentifiableOrderBuilder.newIdentifiableOrderBuilder()
+            .setItem(item).setId(String(data.id)).setPrice(data.price).setQuantity(data.quantity)
+            .build()
+    }
+    reverseMap(data: IdentifiableOrderItem): { data: SQLiteOrder; item: IdentifiableItem; } {
+        return {
+            data: {
+                id: data.getId(),
+                price: data.getPrice(),
+                quantity: data.getQuantity(),
+                item_category: data.getItem().getCategory(),
+                item_id: data.getItem().getId()
+            },
+            item: data.getItem()
+        }
     }
     
 }
