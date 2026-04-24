@@ -1,8 +1,7 @@
 import winston, { format } from "winston";
 import { inspect } from "util";
-import config from "../config";
-const dirName = config.logDir;
 const isDev = true;
+import config from "../config/index";
 const logFileFormat = winston.format.combine(
     winston.format.splat(),
     winston.format.errors({ stack: true }),
@@ -26,11 +25,11 @@ const logConsoleFormat = winston.format.combine(
 const logger = winston.createLogger({
     level: "info",
     transports: [
-        new winston.transports.File({ filename: "logs/error.log", dirname: dirName, level: "error", format: logFileFormat }),
-        new winston.transports.File({ filename: "logs/all.log", dirname: dirName, format: logFileFormat }),
+        new winston.transports.File({ filename: "logs/error.log", dirname: config.logDir, level: "error", format: logFileFormat }),
+        new winston.transports.File({ filename: "logs/all.log", dirname: config.logDir, format: logFileFormat }),
     ],
     exceptionHandlers: [
-        new winston.transports.File({ filename: "logs/exceptions.log", dirname: dirName, format: logFileFormat }),
+        new winston.transports.File({ filename: "logs/exceptions.log", dirname: config.logDir, format: logFileFormat }),
     ],
 });
 if(isDev) {

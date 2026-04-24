@@ -10,7 +10,7 @@ import { ItemNotFoundException } from "../../util/exceptions/repositoryException
 dotenv.config();
 const tableName = ItemCategory.CAKE;
 const CREATE_TABLE = `CREATE TABLE IF NOT EXISTS ${tableName} (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id TEXT PRIMARY KEY,
     type TEXT NOT NULL,
     flavor TEXT NOT NULL,
     filling TEXT NOT NULL,
@@ -26,7 +26,7 @@ const CREATE_TABLE = `CREATE TABLE IF NOT EXISTS ${tableName} (
     specialIngredients TEXT NOT NULL,
     packagingType TEXT NOT NULL
 )`;
-const INSERT_CAKE = `INSERT INTO ${tableName} (type, flavor, filling, size, layers, frostingType, frostingFlavor, decorationType, decorationColor, customMessage, shape, allergies, specialIngredients, packagingType) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+const INSERT_CAKE = `INSERT INTO ${tableName} (id, type, flavor, filling, size, layers, frostingType, frostingFlavor, decorationType, decorationColor, customMessage, shape, allergies, specialIngredients, packagingType) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 const SELECT_BY_ID = `SELECT * FROM ${tableName} WHERE id = ?`; 
 const SELECT_ALL = `SELECT * FROM ${tableName}`;
 const DELETE_ID = `DELETE FROM ${tableName} WHERE id = ?`;
@@ -48,6 +48,7 @@ export class CakeRepository
     try {
       await conn.run(
         INSERT_CAKE,
+        item.getId(),
         item.getType(),
         item.getFlavor(),
         item.getFilling(),
@@ -63,7 +64,7 @@ export class CakeRepository
         item.getSpecialIngredients(),
         item.getPackagingType(),
       );
-    return { getId: () => item.getId() };
+      return { getId: () => item.getId() };
     } catch (error) {
       console.error("Error creating cake:", error);
       throw new Error("Failed to create cake.");
@@ -92,8 +93,31 @@ export class CakeRepository
       throw new Error("Failed to fetch all cakes.");
     }
   }
-  update(item: IdentifiableCake): Promise<void> {
-    throw new Error("Method not implemented.");
+  async update(item: IdentifiableCake): Promise<void> {
+    try{
+      const conn = await ConnectionManager.getConnection();
+      await conn.run(
+        UPDATE_ID,
+        item.getType(),
+        item.getFlavor(),
+        item.getFilling(),
+        item.getSize(),
+        item.getLayers(),
+        item.getFrostingType(),
+        item.getFrostingFlavor(),
+        item.getDecorationType(),
+        item.getDecorationColor(),
+        item.getCustomMessage(),
+        item.getShape(),
+        item.getAllergies(),
+        item.getSpecialIngredients(),
+        item.getPackagingType(),
+        item.getId()
+      );
+    } catch (error) {
+      logger.error("Error updating cake:", error);
+      throw new Error("Failed to update cake.");
+    }
   }
   async delete(id: ID): Promise<void> {
     try {

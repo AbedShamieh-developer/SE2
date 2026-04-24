@@ -8,23 +8,24 @@ import {
 } from "../../model/IItem.model";
 import logger from "../../util/logger";
 import { SQLiteOrder, SQLiteOrderMapper } from "../../mappers/Order.mapper";
-import { Cake, IdentifiableCake } from "../../model/Cake.model";
 dotenv.config();
 
 const CREATE_TABLE = `CREATE TABLE IF NOT EXISTS orders (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id TEXT PRIMARY KEY,
     quantity INTEGER NOT NULL,
     price INTEGER NOT NULL,
     item_category TEXT NOT NULL,
-    item_id INTEGER NOT NULL
+    item_id TEXT NOT NULL
 )`;
-const INSERT_ORDER = `INSERT INTO orders (quantity, price, item_category, item_id) VALUES (?, ?, ?, ?)`;
+const INSERT_ORDER = `INSERT INTO orders (id, quantity, price, item_category, item_id) VALUES (?, ?, ?, ?, ?)`;
 const SELECT_ORDER = `SELECT * FROM orders WHERE id = ?`;
 const SELECT_ALL_ORDERS = `SELECT * FROM orders where item_category = ?`;
+const UPDATE_ORDER = `UPDATE orders SET quantity = ?, price = ?, item_category = ?, item_id = ? WHERE id = ?`;
 const DELETE_ID = `DELETE FROM orders WHERE id = ?`;
 export class OrderRepository implements IRepository<IOrder>, Initializable {
   constructor(
-    private itemRepository: IRepository<IdentifiableItem> & Partial<Initializable>
+    private itemRepository: IRepository<IdentifiableItem> &
+      Partial<Initializable>,
   ) {}
   async init() {
     try {
@@ -45,6 +46,7 @@ export class OrderRepository implements IRepository<IOrder>, Initializable {
       const item_id = await this.itemRepository.create(order.getItem());
       await conn.run(
         INSERT_ORDER,
+        order.getId(),
         order.getQuantity(),
         order.getPrice(),
         order.getItem().getCategory(),
@@ -62,54 +64,78 @@ export class OrderRepository implements IRepository<IOrder>, Initializable {
   }
   async get(id: ID): Promise<IdentifiableOrderItem> {
     try {
-        const conn = await ConnectionManager.getConnection();
-        const row = await conn.get<SQLiteOrder>(SELECT_ORDER, id.getId());
-        if(!row){
-            throw new Error(`Order with id ${id.getId()} not found.`);
-        }
-        const item = await this.itemRepository.get({ getId: () => row.item_id });
-        logger.info(`Fetched order row: ${JSON.stringify(row)}`);
-        return new SQLiteOrderMapper().map({data: row, item: item});
+      const conn = await ConnectionManager.getConnection();
+      const row = await conn.get<SQLiteOrder>(SELECT_ORDER, id.getId());
+      if (!row) {
+        throw new Error(`Order with id ${id.getId()} not found.`);
+      }
+      const item = await this.itemRepository.get({ getId: () => row.item_id });
+      logger.info(`Fetched order row: ${JSON.stringify(row)}`);
+      return new SQLiteOrderMapper().map({ data: row, item: item });
     } catch (error) {
-        logger.error("Error fetching order:", error);
-        throw new Error("Failed to fetch order.");
+      logger.error("Error fetching order:", error);
+      throw new Error("Failed to fetch order.");
     }
   }
   async getAll(): Promise<IdentifiableOrderItem[]> {
     try {
       const conn = await ConnectionManager.getConnection();
       const items = await this.itemRepository.getAll();
-      if(items.length === 0){
+      if (items.length === 0) {
         return [];
       }
-      const orders = await conn.all<SQLiteOrder[]>(SELECT_ALL_ORDERS, items[0].getCategory());
-      const bindOrders = orders.map(order => {
-        const item = items.find(i => i.getId() === order.item_id);
-        if(!item){
-          throw new Error(`Item with id ${order.item_id} not found for order ${order.id}`);
-        }
-        return {order,item};
-      });
-      const identifiableOrders = bindOrders.map(({order, item}) => new SQLiteOrderMapper().map({data: order, item}));
+      const orders = await conn.all<SQLiteOrder[]>(
+        SELECT_ALL_ORDERS,
+        items[0].getCategory(),
+      );
+      const bindOrders = orders
+        .map((order) => {
+          const item = items.find((i) => String(i.getId()) === String(order.item_id));
+          if (!item) {
+            logger.warn(`Skipping orphan order ${order.id}: missing item ${order.item_id}`);
+            return null;
+          }
+          return { order, item };
+        })
+        .filter((entry): entry is { order: SQLiteOrder; item: IdentifiableItem } => entry !== null);
+      const identifiableOrders = bindOrders.map(({ order, item }) =>
+        new SQLiteOrderMapper().map({ data: order, item }),
+      );
       return identifiableOrders;
     } catch (error) {
       logger.error("Error fetching all orders:", error);
       throw new Error("Failed to fetch all orders.");
     }
   }
-  update(item: IdentifiableOrderItem): Promise<void> {
-    throw new Error("Method not implemented.");
+  async update(item: IdentifiableOrderItem): Promise<void> {
+    let conn;
+    try {
+      conn = await ConnectionManager.getConnection();
+      conn.exec("BEGIN TRANSACTION");
+      await this.itemRepository.update(item.getItem());
+      await conn.run(
+        UPDATE_ORDER,
+        item.getQuantity(),
+        item.getPrice(),
+        item.getItem().getCategory(),
+        item.getItem().getId(),
+        item.getId(),
+      );
+      conn.exec("COMMIT");
+    } catch (err) {
+      if (conn) {
+        await conn.exec("ROLLBACK");
+      }
+      throw new Error("Failed to update the order.");
+    }
   }
   async delete(id: ID): Promise<void> {
-        let conn;
+    let conn;
     try {
       conn = await ConnectionManager.getConnection();
       await conn.exec("BEGIN TRANSACTION");
-      await this.itemRepository.delete({getId: () => id.getId()});
-      await conn.run(
-        DELETE_ID,
-        id.getId()
-      );
+      await this.itemRepository.delete({ getId: () => id.getId() });
+      await conn.run(DELETE_ID, id.getId());
       await conn.exec("COMMIT");
     } catch (error) {
       if (conn) {
@@ -118,6 +144,5 @@ export class OrderRepository implements IRepository<IOrder>, Initializable {
       console.error("Error deleting order:", error);
       throw new Error("Failed to delete the order.");
     }
-    } 
   }
-
+}

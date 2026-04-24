@@ -116,9 +116,6 @@ export class IdentifiableCake extends Cake implements IdentifiableItem{
             packagingType
         )
     }
-    getItem(): IItem {
-        return this;
-    }
     getId(): string {
         return this.id;
     }

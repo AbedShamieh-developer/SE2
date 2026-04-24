@@ -83,7 +83,62 @@ export class SQLiteCakeMapper implements IMapper<SQLiteCake, IdentifiableCake> {
             .setId(String(data.id))
             .build()
     }
-    reverseMap?(data: IdentifiableCake): SQLiteCake {
+    reverseMap(data: IdentifiableCake): SQLiteCake {
+        return {
+            id: data.getId(),
+            type: data.getType(),
+            flavor: data.getFlavor(),
+            filling: data.getFilling(),
+            size: data.getSize(),
+            layers: data.getLayers(),
+            frostingType: data.getFrostingType(),
+            frostingFlavor: data.getFrostingFlavor(),
+            decorationType: data.getDecorationType(),
+            decorationColor: data.getDecorationColor(),
+            customMessage: data.getCustomMessage(),
+            shape: data.getShape(),
+            allergies: data.getAllergies(),
+            specialIngredients: data.getSpecialIngredients(),
+            packagingType: data.getPackagingType()
+        }
+    }
+}
+export class JSONCakeMapper implements IMapper<any, IdentifiableCake> {
+    map(data: any): IdentifiableCake {
+        const pick = (...keys: string[]) => {
+            for (const key of keys) {
+                if (data?.[key] !== undefined && data?.[key] !== null) {
+                    return data[key]
+                }
+            }
+            return undefined
+        }
+
+        const customMessage = pick("customMessage", "Custom Message")?.toString().trim()
+
+        const cake = CakeBuilder.newCakeBuilder()
+            .setType(pick("type", "Type"))
+            .setFlavor(pick("flavor", "Flavor"))
+            .setFilling(pick("filling", "Filling"))
+            .setSize(Number(pick("size", "Size")))
+            .setLayers(Number(pick("layers", "Layers")))
+            .setFrostingType(pick("frostingType", "Frosting Type"))
+            .setFrostingFlavor(pick("frostingFlavor", "Frosting Flavor"))
+            .setDecorationType(pick("decorationType", "Decoration Type"))
+            .setDecorationColor(pick("decorationColor", "Decoration Color"))
+            .setCustomMessage(customMessage ? customMessage : "No message")
+            .setShape(pick("shape", "Shape"))
+            .setAllergies(pick("allergies", "Allergies"))
+            .setSpecialIngredients(pick("specialIngredients", "Special Ingredients"))
+            .setPackagingType(pick("packagingType", "Packaging Type"))
+            .build()
+           const identifiableCake = IdentifiableCakeBuilder.newIdentifiableCakeBuilder()
+            .setId(String(pick("id", "item_id")))
+            .setCake(cake)
+            .build()
+            return identifiableCake
+    }
+    reverseMap(data: IdentifiableCake) {
         return {
             id: data.getId(),
             type: data.getType(),

@@ -1,5 +1,4 @@
 import { IOrder } from "../../model/IOrder.model";
-import { Order } from "../../model/Order";
 import { InvalidItemException, ItemNotFoundException } from "../../util/exceptions/repositoryExceptions";
 import logger from "../../util/logger";
 import { ID, IRepository } from "../IRepository";

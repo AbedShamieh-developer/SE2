@@ -20,6 +20,8 @@
   "type": "commonjs",
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
     "@types/jest": "^30.0.0",
     "@typescript-eslint/eslint-plugin": "^8.57.2",
     "@typescript-eslint/parser": "^8.57.2",
@@ -32,11 +34,15 @@
     "typescript": "^5.1.6"
   },
   "dependencies": {
+    "cors": "^2.8.6",
     "csv-parse": "^6.2.1",
     "csv-stringify": "^6.7.0",
     "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "helmet": "^8.1.0",
     "sqlite": "^5.1.1",
     "sqlite3": "^6.0.1",
+    "uuid": "^14.0.0",
     "winston": "^3.19.0"
   }
 }
