@@ -19,7 +19,6 @@ export class Cake implements IItem {
         private specialIngredients: string,
         private packagingType: string
     ) {}
-
     getType(): string {
         return this.type;
     }
