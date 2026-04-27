@@ -51,11 +51,7 @@ describe("OrderRepository", () => {
       // Arrange
       const mockItem: IdentifiableItem = {
         getId: () => "1",
-        getCategory: () => ItemCategory.CAKE,
-        getItem: () => ({
-          getCategory: () => ItemCategory.CAKE,
-        }),
-      };
+        getCategory: () => ItemCategory.CAKE,      };
 
       const mockOrder = {
         getId: () => "order-123",
@@ -78,6 +74,7 @@ describe("OrderRepository", () => {
       expect(mockItemRepository.create).toHaveBeenCalledWith(mockItem);
       expect(mockConnection.run).toHaveBeenCalledWith(
         expect.stringContaining("INSERT INTO orders"),
+        "order-123",
         2,
         29.99,
         "cake",
@@ -90,11 +87,7 @@ describe("OrderRepository", () => {
       // Arrange
       const mockItem: IdentifiableItem = {
         getId: () => "1",
-        getCategory: () => ItemCategory.CAKE,
-        getItem: () => ({
-          getCategory: () => ItemCategory.CAKE,
-        }),
-      };
+        getCategory: () => ItemCategory.CAKE,      };
 
       const mockOrder = {
         getId: () => "order-123",
@@ -118,11 +111,7 @@ describe("OrderRepository", () => {
       // Arrange
       const mockItem: IdentifiableItem = {
         getId: () => "1",
-        getCategory: () => ItemCategory.CAKE,
-        getItem: () => ({
-          getCategory: () => ItemCategory.CAKE,
-        }),
-      };
+        getCategory: () => ItemCategory.CAKE,      };
 
       const mockOrder = {
         getId: () => "order-123",
@@ -158,11 +147,7 @@ describe("OrderRepository", () => {
 
       const mockItem: IdentifiableItem = {
         getId: () => "item-1",
-        getCategory: () => ItemCategory.CAKE,
-        getItem: () => ({
-          getCategory: () => ItemCategory.CAKE,
-        }),
-      };
+        getCategory: () => ItemCategory.CAKE,      };
 
       mockConnection.get.mockResolvedValue(mockRow);
       mockItemRepository.get.mockResolvedValue(mockItem);
@@ -238,3 +223,5 @@ describe("OrderRepository", () => {
     });
   });
 });
+
+
