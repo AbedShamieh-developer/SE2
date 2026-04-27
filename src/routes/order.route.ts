@@ -2,25 +2,26 @@ import {NextFunction, Request, Response, Router} from "express";
 import { OrderController } from "../controllers/order.controller";
 import { OrderManagementService } from "../services/OrderManagement.service";
 import  {asyncHandler}  from "../middleware/asyncHandler";
+import { hasPermission } from "../middleware/authorize";
+import { Permission } from "../config/roles";
 const route = Router();
 
 const orderController = new OrderController(new OrderManagementService())
 
 
 route.route('/')
-     .post(asyncHandler(orderController.createOrder.bind(orderController)))
-     .get(asyncHandler(orderController.getAllOrders.bind(orderController)));
+     .post(hasPermission(Permission.WRITE_ORDER),asyncHandler(orderController.createOrder.bind(orderController)))
+     .get(hasPermission(Permission.READ_ORDER),asyncHandler(orderController.getAllOrders.bind(orderController)));
      
 route.route('/revenue')
-     .get(asyncHandler(orderController.getTotalRevenue.bind(orderController)));
+     .get(hasPermission(Permission.READ_ORDER),asyncHandler(orderController.getTotalRevenue.bind(orderController)));
 route.route('/total-orders')
-     .get(asyncHandler(orderController.getTotalOrders.bind(orderController)))
+     .get(hasPermission(Permission.READ_ORDER),asyncHandler(orderController.getTotalOrders.bind(orderController)))
 
 route.route('/:id')
-     .get(asyncHandler(orderController.getOrder.bind(orderController)))
-     .put(asyncHandler(orderController.updateOrder.bind(orderController)))
-     .delete(asyncHandler(orderController.deleteOrder.bind(orderController)));
+     .get(hasPermission(Permission.READ_ORDER),asyncHandler(orderController.getOrder.bind(orderController)))
+     .put(hasPermission(Permission.UPDATE_ORDER),asyncHandler(orderController.updateOrder.bind(orderController)))
+     .delete(hasPermission(Permission.DELETE_ORDER),asyncHandler(orderController.deleteOrder.bind(orderController)));
 
 
 export default route;
-
