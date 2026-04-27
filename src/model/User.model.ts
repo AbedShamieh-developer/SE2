@@ -1,3 +1,4 @@
+import { Role } from "../config/roles";
 import { IUser } from "./IUser.model";
 
 export class User implements IUser {
@@ -6,7 +7,11 @@ export class User implements IUser {
     private name: string,
     private email: string,
     private password: string,
+    private role: Role = Role.user
   ) {}
+  getRole(): Role {
+    return this.role;
+  }
 
   getId(): string {
     return this.id;

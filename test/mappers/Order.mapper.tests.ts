@@ -29,11 +29,14 @@ describe("CSVOrderMapper", () => {
         "3"
     ]
 
+    const createItemMapper = (item: IItem): IMapper<string[], IItem> => ({
+        map: jest.fn().mockReturnValue(item),
+        reverseMap: jest.fn().mockReturnValue([]),
+    })
+
     it("maps CSV row into an Order using the injected item mapper", () => {
         const fakeItem = new FakeItem()
-        const itemMapper: IMapper<string[], IItem> = {
-            map: jest.fn().mockReturnValue(fakeItem)
-        }
+        const itemMapper = createItemMapper(fakeItem)
         const orderMapper = new CSVOrderMapper(itemMapper)
 
         const row = createValidRow()
@@ -47,9 +50,7 @@ describe("CSVOrderMapper", () => {
     })
 
     it("throws when id is empty", () => {
-        const itemMapper: IMapper<string[], IItem> = {
-            map: jest.fn().mockReturnValue(new FakeItem())
-        }
+        const itemMapper = createItemMapper(new FakeItem())
         const orderMapper = new CSVOrderMapper(itemMapper)
         const row = createValidRow()
         row[0] = "   "
@@ -58,9 +59,7 @@ describe("CSVOrderMapper", () => {
     })
 
     it("throws when parsed price is not a valid positive number", () => {
-        const itemMapper: IMapper<string[], IItem> = {
-            map: jest.fn().mockReturnValue(new FakeItem())
-        }
+        const itemMapper = createItemMapper(new FakeItem())
         const orderMapper = new CSVOrderMapper(itemMapper)
         const row = createValidRow()
         row[row.length - 2] = "abc"
