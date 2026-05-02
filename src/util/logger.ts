@@ -1,7 +1,7 @@
 import winston, { format } from "winston";
 import { inspect } from "util";
 import fs from "fs";
-const isDev = true;
+const isDev = config.isDev;
 import config from "../config/index";
 const logFileFormat = winston.format.combine(
     winston.format.splat(),
@@ -23,7 +23,13 @@ const logConsoleFormat = winston.format.combine(
     })
 );
 
-fs.mkdirSync(config.logDir, { recursive: true });
+try {
+    if (!fs.existsSync(config.logDir)) {
+        fs.mkdirSync(config.logDir, { recursive: true });
+    }
+} catch (error) {
+    console.error("Failed to create log directory:", error);
+}
 
 const logger = winston.createLogger({
     level: "info",
