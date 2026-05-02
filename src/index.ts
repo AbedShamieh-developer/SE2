@@ -1,43 +1,51 @@
-import { ItemNameValidator, MaxPriceValidator, OrderCalculator, OrderManagement, ValidatePrice, OrderRepository, Validator } from "./app-clean";
-
-// main.ts
+import express from "express";
+import config from "./config";
 import logger from "./util/logger";
-// Initialize system
-const validator = new Validator();
-const repository = new OrderRepository();
-const calculator = new OrderCalculator();
-const orderManagement = new OrderManagement(validator, calculator, repository);
+import helmet from "helmet";
+import bodyParser from "body-parser";
+import cors from "cors";
+import requestLogger from "./middleware/requestLogger";
+import routes from "./routes";
+import { HTTPException } from "./util/exceptions/http-exceptions/HTTPExceptions";
+import cookieParser from "cookie-parser";
 
-// Helper to safely add order
-function safeAddOrder(item: string, price: number) {
-  try {
-    orderManagement.addOrder(item, price);
-    logger.info(`Order added: ${item} - $${price}`);
-  } catch (err: any) {
-    logger.error(`Failed to add order: ${item} - $${price}. Reason: ${err.message}`);
+const app = express();
+
+app.use(helmet());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(
+  cors({
+    origin: "*",
+  }),
+);
+app.use(requestLogger);
+app.use(cookieParser());
+app.use("/", routes);
+
+app.use((req, res) => {
+  res.status(404).json({ error: "Not Found" });
+});
+
+app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  if (err instanceof HTTPException) {
+    const httpException = err as HTTPException;
+    logger.error(
+      `${httpException.name}: [${httpException.status}] ${httpException.message} ${httpException.details} || {}`,
+    );
+    res.status(httpException.status).json({
+      message: httpException.message,
+      details: httpException.details || "No details provided",
+    });
+    return;
   }
-}
 
-// Demo operations
-safeAddOrder("Chocolate", 50);
-safeAddOrder("Sponge", 20);
-safeAddOrder("InvalidItem", 30); // will throw an error and be logged
+  logger.error("Unhandled Error: " + err.message);
+  res.status(500).json({
+    message: "Internal Server Error",
+  });
+});
 
-// Show all orders
-const allOrders = orderManagement.getOrder();
-logger.info(`Current orders: ${JSON.stringify(allOrders)}`);
-
-// Get revenue
-const revenue = orderManagement.getRevenue();
-logger.info(`Total revenue: $${revenue}`);
-
-// Get average buy power
-const average = orderManagement.getAverageBuyPower();
-logger.info(`Average buy power: $${average}`);
-
-// Remove an order
-orderManagement.removeOrder(1);
-logger.info("Order with ID 1 removed");
-
-// Show updated orders
-logger.info(`Orders after removal: ${JSON.stringify(orderManagement.getOrder())}`);
+app.listen(config.port, config.host, () => {
+  logger.info(`Server is running on http://${config.host}:${config.port}`);
+});

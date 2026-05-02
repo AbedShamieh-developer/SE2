@@ -1,0 +1,738 @@
+openapi: 3.0.3
+info:
+  title: SE2 API
+  version: 1.0.0
+  description: |
+    API documentation for the current RBAC implementation.
+    Authentication is cookie-based (`token`, `refreshToken`).
+servers:
+  - url: http://localhost:3000
+    description: Local development server
+tags:
+  - name: Health
+  - name: Auth
+  - name: Orders
+  - name: Users
+  - name: Admin
+paths:
+  /:
+    get:
+      tags: [Health]
+      summary: Welcome route
+      responses:
+        "200":
+          description: Welcome message
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Welcome to the API
+
+  /auth/register:
+    post:
+      tags: [Auth]
+      summary: Register a new user
+      description: Creates a new user with default role `user`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterRequest"
+      responses:
+        "201":
+          description: User created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: "#/components/schemas/User"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Login
+      description: Authenticates user and sets `token` and `refreshToken` cookies.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Login Successful
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /auth/logout:
+    get:
+      tags: [Auth]
+      summary: Logout
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Logout Successful
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /orders:
+    post:
+      tags: [Orders]
+      summary: Create order
+      description: |
+        Requires auth and `write:order` permission.
+        Effective roles: `admin`, `manager`, `user`.
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OrderRequest"
+      responses:
+        "201":
+          description: Order created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  createdOrder:
+                    $ref: "#/components/schemas/Order"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+    get:
+      tags: [Orders]
+      summary: Get all orders
+      description: |
+        Requires auth and `read:order` permission.
+        Effective roles: `admin`, `manager`.
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Orders list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Order"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /orders/revenue:
+    get:
+      tags: [Orders]
+      summary: Get total revenue
+      description: |
+        Requires auth and `read:order` permission.
+        Effective roles: `admin`, `manager`.
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Total revenue
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  totalRevenue:
+                    type: number
+                    example: 120
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /orders/total-orders:
+    get:
+      tags: [Orders]
+      summary: Get total number of orders
+      description: |
+        Requires auth and `read:order` permission.
+        Effective roles: `admin`, `manager`.
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Total orders count
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  totalOrders:
+                    type: integer
+                    example: 8
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /orders/{id}:
+    parameters:
+      - $ref: "#/components/parameters/OrderIdPath"
+    get:
+      tags: [Orders]
+      summary: Get order by id
+      description: |
+        Requires auth and `read:order` permission.
+        Effective roles: `admin`, `manager`.
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Order details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    put:
+      tags: [Orders]
+      summary: Update order
+      description: |
+        Requires auth and `update:order` permission.
+        Effective roles: `admin`, `manager`.
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OrderRequest"
+      responses:
+        "200":
+          description: Updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: Order Updated Successfully
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    delete:
+      tags: [Orders]
+      summary: Delete order
+      description: |
+        Requires auth and `delete:order` permission.
+        Effective roles: `admin`, `manager`.
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: Order Deleted Successfully
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /users:
+    get:
+      tags: [Users]
+      summary: Get all users
+      description: Admin only.
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Users list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  users:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/User"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /users/me:
+    get:
+      tags: [Users]
+      summary: Get current user profile
+      description: |
+        Requires auth and `read:user` permission.
+        Returns the authenticated user's own record.
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: User details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: "#/components/schemas/User"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    put:
+      tags: [Users]
+      summary: Update current user profile
+      description: |
+        Requires auth and `update:user` permission.
+        Updates the authenticated user's own record.
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterRequest"
+      responses:
+        "200":
+          description: User updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: "#/components/schemas/User"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    delete:
+      tags: [Users]
+      summary: Delete current user
+      description: |
+        Requires auth and `delete:user` permission.
+        Deletes the authenticated user's own account.
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: User deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: User Deleted Successfully
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /users/{id}:
+    parameters:
+      - $ref: "#/components/parameters/UserIdPath"
+    get:
+      tags: [Users]
+      summary: Get user by id
+      description: |
+        Requires auth and `read:user` permission.
+        Allowed for `admin`, or when `{id}` is the authenticated user's id.
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: User details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: "#/components/schemas/User"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    put:
+      tags: [Users]
+      summary: Update user
+      description: |
+        Requires auth and `update:user` permission.
+        Allowed for `admin`, or when `{id}` is the authenticated user's id.
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterRequest"
+      responses:
+        "200":
+          description: User updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: "#/components/schemas/User"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    delete:
+      tags: [Users]
+      summary: Delete user
+      description: |
+        Requires auth and `delete:user` permission.
+        Allowed for `admin`, or when `{id}` is the authenticated user's id.
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: User deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: User Deleted Successfully
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /admin/users:
+    get:
+      tags: [Admin]
+      summary: Get all users (admin area)
+      description: Admin only. Equivalent access scope to GET `/users`.
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Users list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  users:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/User"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /admin/users/{id}/role:
+    parameters:
+      - $ref: "#/components/parameters/UserIdPath"
+    patch:
+      tags: [Admin]
+      summary: Update user role
+      description: Admin only.
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateRoleRequest"
+      responses:
+        "200":
+          description: Role updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: "#/components/schemas/User"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: token
+
+  parameters:
+    OrderIdPath:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+      example: order-5
+    UserIdPath:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+      example: user-1
+
+  schemas:
+    Role:
+      type: string
+      enum: [admin, manager, user]
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          example: user-1
+        name:
+          type: string
+          example: John Doe
+        email:
+          type: string
+          format: email
+          example: john@example.com
+        role:
+          $ref: "#/components/schemas/Role"
+
+    RegisterRequest:
+      type: object
+      required: [name, email, password]
+      properties:
+        name:
+          type: string
+          example: John Doe
+        email:
+          type: string
+          format: email
+          example: john@example.com
+        password:
+          type: string
+          example: Secret123!
+
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+          example: john@example.com
+        password:
+          type: string
+          example: Secret123!
+
+    CakeItem:
+      type: object
+      required:
+        - id
+        - type
+        - flavor
+        - filling
+        - size
+        - layers
+        - frostingType
+        - frostingFlavor
+        - decorationType
+        - decorationColor
+        - customMessage
+        - shape
+        - allergies
+        - specialIngredients
+        - packagingType
+      properties:
+        id:
+          type: string
+          example: cake-3
+        type:
+          type: string
+          example: Birthday Cake
+        flavor:
+          type: string
+          example: Chocolate
+        filling:
+          type: string
+          example: Strawberry Jam
+        size:
+          type: number
+          example: 9
+        layers:
+          type: number
+          example: 2
+        frostingType:
+          type: string
+          example: Buttercream
+        frostingFlavor:
+          type: string
+          example: Vanilla
+        decorationType:
+          type: string
+          example: Sprinkles
+        decorationColor:
+          type: string
+          example: Rainbow
+        customMessage:
+          type: string
+          example: Happy Birthday!
+        shape:
+          type: string
+          example: Round
+        allergies:
+          type: string
+          example: None
+        specialIngredients:
+          type: string
+          example: None
+        packagingType:
+          type: string
+          example: Box
+
+    OrderRequest:
+      type: object
+      required: [id, price, quantity, item]
+      properties:
+        id:
+          type: string
+          example: order-5
+        price:
+          type: number
+          example: 30
+        quantity:
+          type: number
+          example: 2
+        item:
+          $ref: "#/components/schemas/CakeItem"
+
+    Order:
+      allOf:
+        - $ref: "#/components/schemas/OrderRequest"
+
+    UpdateRoleRequest:
+      type: object
+      required: [role]
+      properties:
+        role:
+          $ref: "#/components/schemas/Role"
+
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Unauthorized
+        details:
+          type: object
+          additionalProperties: true
+
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    Unauthorized:
+      description: Authentication required or invalid token
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    Forbidden:
+      description: Role/permission does not allow this action
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
