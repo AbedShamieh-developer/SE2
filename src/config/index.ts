@@ -10,8 +10,8 @@ export default {
     isDev: process.env.NodeEnv === "development",
     isProduction: process.env.NodeEnv === "production",
     port: process.env.PORT ? parseInt(process.env.PORT) : 3000,
-    // Railway requires binding to all interfaces.
-    host: process.env.HOST || "0.0.0.0",
+    // Railway requires binding to 0.0.0.0 inside the container.
+    host: "0.0.0.0",
     dbMode: DBMode.SQLITE,
     auth: {
         secretKey: process.env.JWT_SECRET_KEY || "secret",
