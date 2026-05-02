@@ -1,5 +1,6 @@
 import winston, { format } from "winston";
 import { inspect } from "util";
+import fs from "fs";
 const isDev = true;
 import config from "../config/index";
 const logFileFormat = winston.format.combine(
@@ -22,14 +23,16 @@ const logConsoleFormat = winston.format.combine(
     })
 );
 
+fs.mkdirSync(config.logDir, { recursive: true });
+
 const logger = winston.createLogger({
     level: "info",
     transports: [
-        new winston.transports.File({ filename: "logs/error.log", dirname: config.logDir, level: "error", format: logFileFormat }),
-        new winston.transports.File({ filename: "logs/all.log", dirname: config.logDir, format: logFileFormat }),
+        new winston.transports.File({ filename: "error.log", dirname: config.logDir, level: "error", format: logFileFormat }),
+        new winston.transports.File({ filename: "all.log", dirname: config.logDir, format: logFileFormat }),
     ],
     exceptionHandlers: [
-        new winston.transports.File({ filename: "logs/exceptions.log", dirname: config.logDir, format: logFileFormat }),
+        new winston.transports.File({ filename: "exceptions.log", dirname: config.logDir, format: logFileFormat }),
     ],
 });
 if(isDev) {

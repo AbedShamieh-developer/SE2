@@ -8,7 +8,6 @@
     "prebuild": "npm run clean",
     "build": "tsc",
     "postbuild": "echo 'done'",
-    "prestart": "npm run build",
     "start": "node build/index.js",
     "dev": "ts-node-dev --respawn src/index.ts",
     "lint": "eslint \"src/**/*.ts\"",
