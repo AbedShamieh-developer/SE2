@@ -1,8 +1,8 @@
 import winston, { format } from "winston";
 import { inspect } from "util";
 import fs from "fs";
-const isDev = config.isDev;
 import config from "../config/index";
+const isDev = config.isDev;
 const logFileFormat = winston.format.combine(
     winston.format.splat(),
     winston.format.errors({ stack: true }),
