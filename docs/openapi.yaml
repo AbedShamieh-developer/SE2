@@ -6,8 +6,10 @@ info:
     API documentation for the current RBAC implementation.
     Authentication is cookie-based (`token`, `refreshToken`).
 servers:
+  - url: http://localhost:3000/api/v1
+    description: Local development server (v1)
   - url: http://localhost:3000
-    description: Local development server
+    description: Local development server (unversioned fallback)
 tags:
   - name: Health
   - name: Auth

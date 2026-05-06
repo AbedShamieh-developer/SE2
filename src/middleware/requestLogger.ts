@@ -14,7 +14,7 @@ const requestLogger = (req: Request, res: Response, next: NextFunction) => {
             level = 'warn';
         }
         const {method, url} = req;
-      logger.log({level, message: `${req.method} ${req.url} ${status} (${responseTime} ms)`});
+      logger.log({level, message: `${method} ${url} ${status} (${responseTime} ms)`});
     });
   next();
 }

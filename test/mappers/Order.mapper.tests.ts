@@ -32,7 +32,8 @@ describe("CSVOrderMapper", () => {
     it("maps CSV row into an Order using the injected item mapper", () => {
         const fakeItem = new FakeItem()
         const itemMapper: IMapper<string[], IItem> = {
-            map: jest.fn().mockReturnValue(fakeItem)
+            map: jest.fn().mockReturnValue(fakeItem),
+            reverseMap: jest.fn()
         }
         const orderMapper = new CSVOrderMapper(itemMapper)
 
@@ -48,7 +49,8 @@ describe("CSVOrderMapper", () => {
 
     it("throws when id is empty", () => {
         const itemMapper: IMapper<string[], IItem> = {
-            map: jest.fn().mockReturnValue(new FakeItem())
+            map: jest.fn().mockReturnValue(new FakeItem()),
+            reverseMap: jest.fn()
         }
         const orderMapper = new CSVOrderMapper(itemMapper)
         const row = createValidRow()
@@ -59,7 +61,8 @@ describe("CSVOrderMapper", () => {
 
     it("throws when parsed price is not a valid positive number", () => {
         const itemMapper: IMapper<string[], IItem> = {
-            map: jest.fn().mockReturnValue(new FakeItem())
+            map: jest.fn().mockReturnValue(new FakeItem()),
+            reverseMap: jest.fn()
         }
         const orderMapper = new CSVOrderMapper(itemMapper)
         const row = createValidRow()
