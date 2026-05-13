@@ -1,7 +1,6 @@
 import { Request } from "express";
 import { JwtPayload } from "jsonwebtoken";
 import { Role } from "./roles";
-import { IUser } from "../model/IUser.model";
 
 export enum DBMode {
   SQLITE = "sqlite",

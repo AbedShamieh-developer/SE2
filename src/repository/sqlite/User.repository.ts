@@ -5,8 +5,9 @@ import { ConnectionManager } from "./ConnectionManager";
 import logger from "../../util/logger";
 import { ItemNotFoundException } from "../../util/exceptions/repositoryExceptions";
 import { toRole } from "../../config/roles";
+import { UserMapper } from "../../mappers/User.mapper";
 
-type SQLiteUser = {
+export interface SQLiteUser {
   id: string;
   name: string;
   email: string;
@@ -68,7 +69,7 @@ export class UserRepository implements IRepository<IUser>, Initializable {
       if (!row) {
         throw new ItemNotFoundException(`User with id ${id.getId()} not found.`);
       }
-      return new User(row.id, row.name, row.email, row.password, toRole(row.role));
+      return new UserMapper().map(row);
     } catch (error) {
       if (error instanceof ItemNotFoundException) {
         throw error;
@@ -82,7 +83,7 @@ export class UserRepository implements IRepository<IUser>, Initializable {
     try {
       const conn = await ConnectionManager.getConnection();
       const rows = await conn.all<SQLiteUser[]>(SELECT_ALL_USERS);
-      return rows.map((row) => new User(row.id, row.name, row.email, row.password, toRole(row.role)));
+      return rows.map((row) => new UserMapper().map(row));
     } catch (error) {
       logger.error("Error fetching users:", error);
       throw new Error("Failed to fetch users.");
@@ -134,7 +135,7 @@ export class UserRepository implements IRepository<IUser>, Initializable {
       if(!row){
         throw new ItemNotFoundException(`User with email ${email} not found.`);
       }
-      const user = new User(row.id, row.name, row.email, row.password, toRole(row.role));
+      const user = new UserMapper().map(row);
       return user;
     }catch(error){
       logger.error("Failed to fetch user by email:", error);

@@ -31,10 +31,10 @@ export class UserManagementService {
   }
 
   async getUser(id: string): Promise<IUser> {
-    const repo = await this.getRepository();
     if (!id) {
       throw new BadRequestException("Id is required", { IdNotDefined: true });
     }
+    const repo = await this.getRepository();
     try {
       return await repo.get({ getId: () => id });
     } catch (error) {
@@ -96,10 +96,10 @@ export class UserManagementService {
   }
 
   async updateUserRole(id: string, role: Role): Promise<IUser> {
-    const repo = await this.getRepository();
     if (!id) {
       throw new BadRequestException("Id is required", { IdNotDefined: true });
     }
+    const repo = await this.getRepository();
     const existingUser = await this.getUser(id);
     const user = new User(
       id,
