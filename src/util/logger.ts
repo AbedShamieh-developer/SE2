@@ -33,7 +33,7 @@ const logger = winston.createLogger({
     ],
 });
 if(config.isProduction){
-    logger.add(new winston.transports.Console({format: logConsoleFormat, level: "info"})
+    logger.add(new winston.transports.Console({format: logConsoleFormat, level: "info"}))
 }
 if(isDev) {
     logger.add(new winston.transports.Console({ format: logConsoleFormat }));
