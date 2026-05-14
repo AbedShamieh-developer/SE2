@@ -32,6 +32,9 @@ const logger = winston.createLogger({
         new winston.transports.File({ filename: "logs/exceptions.log", dirname: config.logDir, format: logFileFormat }),
     ],
 });
+if(config.isProduction){
+    logger.add(new winston.transports.Console({format: logConsoleFormat, level: "info"})
+}
 if(isDev) {
     logger.add(new winston.transports.Console({ format: logConsoleFormat }));
     logger.level = "debug"; // Set to debug for development to capture all logs in console
