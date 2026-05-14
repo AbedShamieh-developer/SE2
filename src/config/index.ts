@@ -6,9 +6,9 @@ import { StringValue } from 'ms'
 dotenv.config({path: path.join(__dirname,'../../.env')})
 
 export default {
-    logDir: process.env.LogDir || "./logs",
-    isDev: process.env.NodeEnv === "development",
-    isProduction: process.env.NodeEnv === "production",
+    logDir: process.env.LOG_DIR || process.env.LogDir || "./logs",
+    isDev: (process.env.NODE_ENV || process.env.NodeEnv) === "development",
+    isProduction: (process.env.NODE_ENV || process.env.NodeEnv) === "production",
     port: process.env.PORT ? parseInt(process.env.PORT) : 3000,
     host: process.env.HOST || "localhost",
     dbMode: DBMode.SQLITE,
