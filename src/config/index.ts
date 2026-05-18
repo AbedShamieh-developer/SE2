@@ -3,7 +3,8 @@ import path from "path"
 import { DBMode } from "./types"
 import { StringValue } from 'ms'
 
-dotenv.config({path: path.join(__dirname,'../../.env.${process.env.NODE_ENV}')})
+const nodeEnv = process.env.NODE_ENV || "development"
+dotenv.config({ path: path.join(__dirname, `../../.env.${nodeEnv}`) })
 
 export default {
     logDir: process.env.LOG_DIR || process.env.LogDir || "./logs",
